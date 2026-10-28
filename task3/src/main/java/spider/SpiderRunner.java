@@ -60,7 +60,9 @@ public class SpiderRunner {
                 JsonNode successors = root.path("successors");
                 if (successors.isArray()) {
                     for (JsonNode s : successors) {
-                        crawl(s.asText(), baseUrl, httpClient, phaser, executor, visited, results);
+                        String successor = s.asText();
+                        String nextPath = successor.startsWith("/") ? successor : "/" + successor;
+                        crawl(nextPath, baseUrl, httpClient, phaser, executor, visited, results);
                     }
                 }
             } catch (Exception e) {
