@@ -53,4 +53,67 @@ class LinkedStringListTest {
         for (String ignored : list) count++;
         assertEquals(perThread * threads, count);
     }
+
+    @Test
+    void iteratorThrowsNoSuchElementExceptionWhenExhausted() {
+        LinkedStringList list = new LinkedStringList();
+        Iterator<String> emptyIt = list.iterator();
+        assertThrows(java.util.NoSuchElementException.class, emptyIt::next);
+
+        list.addFirst("item");
+        Iterator<String> it = list.iterator();
+        assertTrue(it.hasNext());
+        assertEquals("item", it.next());
+        assertFalse(it.hasNext());
+        assertThrows(java.util.NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    void singleElementList() {
+        LinkedStringList list = new LinkedStringList();
+        list.addFirst("lone");
+
+        Iterator<String> it = list.iterator();
+        assertTrue(it.hasNext());
+        assertEquals("lone", it.next());
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    void getHeadAndNodeStructure() {
+        LinkedStringList list = new LinkedStringList();
+        LinkedStringList.Node head = list.getHead();
+        assertNotNull(head);
+        assertNull(head.value);
+        assertNotNull(head.lock);
+        assertNull(head.next);
+
+        list.addFirst("first");
+        assertSame(head, list.getHead());
+        assertNotNull(head.next);
+        assertEquals("first", head.next.value);
+        assertNotNull(head.next.lock);
+        assertNull(head.next.next);
+
+        list.addFirst("second");
+        assertEquals("second", head.next.value);
+        assertEquals("first", head.next.next.value);
+    }
+
+    @Test
+    void independentIterators() {
+        LinkedStringList list = new LinkedStringList();
+        list.addFirst("two");
+        list.addFirst("one");
+
+        Iterator<String> it1 = list.iterator();
+        Iterator<String> it2 = list.iterator();
+
+        assertEquals("one", it1.next());
+        assertEquals("one", it2.next());
+        assertEquals("two", it1.next());
+        assertEquals("two", it2.next());
+        assertFalse(it1.hasNext());
+        assertFalse(it2.hasNext());
+    }
 }
